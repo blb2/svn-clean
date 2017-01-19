@@ -1,0 +1,12 @@
+*~
+*.swp
+
+*.aps
+*.opensdf
+*.sdf
+*.suo
+*.user
+
+bin/
+ipch/
+obj/
