@@ -36,8 +36,10 @@ namespace svn_clean
             {
                 try
                 {
+                    string workingDirectory = Path.GetFullPath(dir);
+
                     var procInfo = new ProcessStartInfo();
-                    procInfo.WorkingDirectory = dir;
+                    procInfo.WorkingDirectory = workingDirectory;
                     procInfo.FileName = "svn";
                     procInfo.Arguments = "status --xml --no-ignore" + (ignoreExternals ? " --ignore-externals" : "");
                     procInfo.UseShellExecute = false;
@@ -46,9 +48,11 @@ namespace svn_clean
                     var svn = Process.Start(procInfo);
                     var xml = XDocument.Load(svn.StandardOutput);
 
+                    Debug.Assert(svn.HasExited);
+
                     var xpath = "/status/target/entry[./wc-status/@item=\"unversioned\" or ./wc-status/@item=\"ignored\"]/@path";
                     var items = from attr in ((IEnumerable)xml.XPathEvaluate(xpath)).OfType<XAttribute>()
-                                select Path.GetFullPath(Path.Combine(procInfo.WorkingDirectory, attr.Value));
+                                select Path.Combine(workingDirectory, attr.Value);
 
                     foreach (var item in items)
                     {
