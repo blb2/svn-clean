@@ -3,18 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svn-clean", "svn-clean.csproj", "{117DE9BD-6FD0-4268-8AFF-8155FE33CE80}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "svn-clean", "svn-clean.vcxproj", "{C9A05715-CCA7-4F2E-A98D-8B1A5E9E310E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{117DE9BD-6FD0-4268-8AFF-8155FE33CE80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{117DE9BD-6FD0-4268-8AFF-8155FE33CE80}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{117DE9BD-6FD0-4268-8AFF-8155FE33CE80}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{117DE9BD-6FD0-4268-8AFF-8155FE33CE80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9A05715-CCA7-4F2E-A98D-8B1A5E9E310E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C9A05715-CCA7-4F2E-A98D-8B1A5E9E310E}.Debug|Win32.Build.0 = Debug|Win32
+		{C9A05715-CCA7-4F2E-A98D-8B1A5E9E310E}.Release|Win32.ActiveCfg = Release|Win32
+		{C9A05715-CCA7-4F2E-A98D-8B1A5E9E310E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
