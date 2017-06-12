@@ -14,12 +14,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 template <bool name_compare=false>
-inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* b)
+inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* p_str)
 {
 	if (name_compare)
-		return strcasecmp(p_xml_obj->name(), b, p_xml_obj->name_size()) == 0;
+		return strncmp(p_xml_obj->name(), p_str, p_xml_obj->name_size()) == 0;
 	else
-		return strcasecmp(p_xml_obj->value(), b, p_xml_obj->value_size()) == 0;
+		return strcasecmp(p_xml_obj->value(), p_str, p_xml_obj->value_size()) == 0;
 }
 
 int main(int argc, char* argv[])

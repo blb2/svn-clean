@@ -19,11 +19,11 @@ void platform_deinit(void)
 {
 }
 
-std::string get_full_path(const char* path)
+std::string get_full_path(const std::string& path)
 {
 	std::string full_path;
 
-	char* p_full_path = realpath(path);
+	char* p_full_path = realpath(path.c_str());
 	if (p_full_path) {
 		full_path = p_full_path;
 		free(p_full_path);
@@ -39,7 +39,7 @@ std::string get_full_path(const char* path)
 	return full_path;
 }
 
-std::vector<uint8_t> get_cmd_output(const char* dir, const char* p_cmd)
+std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
 {
 	// TODO: execute command and capture its output
 	return std::vector<uint8_t>();

@@ -18,24 +18,24 @@ using char_type   = wchar_t;
 
 #define STR_LITERAL(s) L##s
 
-static inline string_type convert_string(bool is_utf8, const char* s)
+static inline string_type convert_string(bool is_utf8, const char* p_str)
 {
 	const UINT codepage = (is_utf8 ? CP_UTF8 : CP_ACP);
 
-	const int wstr_size = MultiByteToWideChar(codepage, 0, s, -1, NULL, 0);
+	const int wstr_size = MultiByteToWideChar(codepage, 0, p_str, -1, nullptr, 0);
 	if (wstr_size == 0)
 		return L"";
 
-	std::unique_ptr<wchar_t[]> wstr(new wchar_t[wstr_size]);
-	if (MultiByteToWideChar(codepage, 0, s, -1, wstr.get(), wstr_size) == 0)
+	std::unique_ptr<wchar_t[]> p_wstr(new wchar_t[wstr_size]);
+	if (MultiByteToWideChar(codepage, 0, p_str, -1, p_wstr.get(), wstr_size) == 0)
 		return L"";
 
-	return wstr.get();
+	return p_wstr.get();
 }
 
-static inline string_type convert_string(bool is_utf8, std::string&& s)
+static inline string_type convert_string(bool is_utf8, std::string&& str)
 {
-	return convert_string(is_utf8, s.c_str());
+	return convert_string(is_utf8, str.c_str());
 }
 
 #else
@@ -45,14 +45,14 @@ using char_type   = char;
 
 #define STR_LITERAL(s) s
 
-static inline string_type convert_string(bool is_utf8, const char* s)
+static inline string_type convert_string(bool is_utf8, const char* p_str)
 {
-	return s;
+	return p_str;
 }
 
-static inline string_type convert_string(bool is_utf8, std::string&& s)
+static inline string_type convert_string(bool is_utf8, std::string&& str)
 {
-	return std::move(s);
+	return std::move(str);
 }
 
 #endif
@@ -65,7 +65,7 @@ bool platform_init(void);
 void platform_deinit(void);
 
 string_type get_full_path(const string_type& path);
-std::vector<uint8_t> get_cmd_output(const char_type* dir, const char_type* p_cmd);
+std::vector<uint8_t> get_cmd_output(const char_type* p_dir, const char_type* p_cmd);
 void remove_files(const std::vector<string_type>& files);
 
 ////////////////////////////////////////////////////////////////////////////////

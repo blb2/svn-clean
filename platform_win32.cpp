@@ -53,12 +53,12 @@ std::wstring get_full_path(const std::wstring& path)
 	return full_path;
 }
 
-std::vector<uint8_t> get_cmd_output(const wchar_t* dir, const wchar_t* p_cmd)
+std::vector<uint8_t> get_cmd_output(const wchar_t* p_dir, const wchar_t* p_cmd)
 {
 	std::vector<uint8_t> output;
 
-	if (SetCurrentDirectory(dir)) {
-		SECURITY_ATTRIBUTES stdout_sec_attrs = {};
+	if (SetCurrentDirectory(p_dir)) {
+		SECURITY_ATTRIBUTES stdout_sec_attrs = { };
 		stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
 		stdout_sec_attrs.bInheritHandle = TRUE;
 
