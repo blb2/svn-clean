@@ -115,8 +115,8 @@ void remove_files(const std::vector<std::wstring>& files)
 	items.reserve(files.size());
 
 	for (auto& file : files) {
-		PIDLIST_ABSOLUTE item = ILCreateFromPath(file.c_str());
-		if (item)
+		PIDLIST_ABSOLUTE item;
+		if (SUCCEEDED(SHParseDisplayName(file.c_str(), nullptr, &item, 0, nullptr)))
 			items.push_back(item);
 	}
 
@@ -132,7 +132,7 @@ void remove_files(const std::vector<std::wstring>& files)
 	}
 
 	for (auto& item : items)
-		ILFree(item);
+		CoTaskMemFree(item);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
