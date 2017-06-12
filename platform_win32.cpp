@@ -14,7 +14,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern const char g_directory_sep = '\\';
+extern const wchar_t g_directory_sep = L'\\';
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,24 +28,24 @@ void platform_deinit(void)
 	CoUninitialize();
 }
 
-std::string get_full_path(const char* path)
+std::wstring get_full_path(const std::wstring& path)
 {
-	std::string full_path;
+	std::wstring full_path;
 
-	if (PathIsRelative(path)) {
-		std::vector<char> path_buf;
+	if (PathIsRelative(path.c_str())) {
+		std::vector<wchar_t> path_buf;
 
 		do {
 			path_buf.resize(path_buf.size() + MAX_PATH);
-			GetFullPathName(path, static_cast<DWORD>(path_buf.size()), path_buf.data(), nullptr);
-		} while (GetLastError() == ERROR_SUCCESS && path_buf[0] == '\0');
+			GetFullPathName(path.c_str(), static_cast<DWORD>(path_buf.size()), path_buf.data(), nullptr);
+		} while (GetLastError() == ERROR_SUCCESS && path_buf[0] == L'\0');
 
 		full_path = path_buf.data();
 	} else {
 		full_path = path;
 	}
 
-	std::replace(full_path.begin(), full_path.end(), '/', g_directory_sep);
+	std::replace(full_path.begin(), full_path.end(), L'/', g_directory_sep);
 
 	while (!full_path.empty() && full_path.back() == g_directory_sep)
 		full_path.pop_back();
@@ -53,7 +53,7 @@ std::string get_full_path(const char* path)
 	return full_path;
 }
 
-std::vector<uint8_t> get_cmd_output(const char* dir, const char* p_cmd)
+std::vector<uint8_t> get_cmd_output(const wchar_t* dir, const wchar_t* p_cmd)
 {
 	std::vector<uint8_t> output;
 
@@ -72,11 +72,11 @@ std::vector<uint8_t> get_cmd_output(const char* dir, const char* p_cmd)
 			si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
 			si.hStdOutput = h_stdout_write;
 
-			std::string cmd = p_cmd;
+			std::wstring cmd = p_cmd;
 			std::array<uint8_t, BUFSIZ> read_block;
 
 			PROCESS_INFORMATION pi = {};
-			if (CreateProcess(nullptr, const_cast<char*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
+			if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
 				CloseHandle(h_stdout_write);
 				h_stdout_write = INVALID_HANDLE_VALUE;
 
@@ -109,7 +109,7 @@ std::vector<uint8_t> get_cmd_output(const char* dir, const char* p_cmd)
 	return output;
 }
 
-void remove_files(const std::vector<std::string>& files)
+void remove_files(const std::vector<std::wstring>& files)
 {
 	std::vector<PIDLIST_ABSOLUTE> items;
 	items.reserve(files.size());
@@ -127,8 +127,6 @@ void remove_files(const std::vector<std::string>& files)
 	if (SUCCEEDED(SHCreateShellItemArrayFromIDLists(items.size(), items.data(), &p_items))) {
 		CComPtr<IFileOperation> p_file_op;
 		if (SUCCEEDED(p_file_op.CoCreateInstance(CLSID_FileOperation)))
-			p_file_op->SetOperationFlags(FOF_NO_CONNECTED_ELEMENTS);
-
 			if (SUCCEEDED(p_file_op->DeleteItems(p_items)))
 				p_file_op->PerformOperations();
 	}

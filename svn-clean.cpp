@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <string>
 #include <vector>
 #include "externals/rapidxml/rapidxml.hpp"
 #include "platform.h"
@@ -42,16 +41,19 @@ int main(int argc, char* argv[])
 			ignore_externals = true;
 	}
 
-	std::string svn_cmd = "svn status --xml --no-ignore";
+	string_type svn_cmd = STR_LITERAL("svn status --xml --no-ignore");
 	if (ignore_externals)
-		svn_cmd += " --ignore-externals";
+		svn_cmd += STR_LITERAL(" --ignore-externals");
 
-	std::vector<const char*> dirs(argv + i, argv + argc);
+	std::vector<string_type> dirs;
+	for (i; i < argc; i++)
+		dirs.push_back(convert_string(false, argv[i]));
+
 	if (dirs.empty())
-		dirs.emplace_back(".");
+		dirs.emplace_back(STR_LITERAL("."));
 
 	for (auto& dir : dirs) {
-		const std::string working_dir = get_full_path(dir);
+		const string_type working_dir = get_full_path(dir);
 
 		std::vector<uint8_t> svn_out = get_cmd_output(working_dir.c_str(), svn_cmd.c_str());
 		if (svn_out.empty())
@@ -67,7 +69,7 @@ int main(int argc, char* argv[])
 			xml.clear();
 		}
 
-		std::vector<std::string> files;
+		std::vector<string_type> files;
 
 		rapidxml::xml_node<>* p_root_node = xml.first_node("status");
 		if (p_root_node) {
@@ -85,10 +87,8 @@ int main(int argc, char* argv[])
 						if (p_item_attr && (is_equal(p_item_attr, "unversioned") || is_equal(p_item_attr, "ignored"))) {
 							rapidxml::xml_attribute<>* p_path_attr = p_entry_node->first_attribute("path");
 
-							if (p_path_attr) {
-								std::string path(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size());
-								files.push_back(working_dir + g_directory_sep + path);
-							}
+							if (p_path_attr)
+								files.push_back(working_dir + g_directory_sep + convert_string(true, std::string(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size())));
 						}
 					}
 
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 		if (dry_run) {
 			for (auto& file : files)
-				std::cout << "Would remove file: " << file << '\n';
+				std::wcout << "Would remove file: " << file << '\n';
 		} else {
 			remove_files(files);
 		}
