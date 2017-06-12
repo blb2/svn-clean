@@ -75,7 +75,7 @@ std::vector<uint8_t> get_cmd_output(const wchar_t* dir, const wchar_t* p_cmd)
 			std::wstring cmd = p_cmd;
 			std::array<uint8_t, BUFSIZ> read_block;
 
-			PROCESS_INFORMATION pi = {};
+			PROCESS_INFORMATION pi = { };
 			if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
 				CloseHandle(h_stdout_write);
 				h_stdout_write = INVALID_HANDLE_VALUE;
