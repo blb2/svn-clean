@@ -1,5 +1,5 @@
-#ifndef JUNKFILE_TARGETVER_H
-#define JUNKFILE_TARGETVER_H
+#ifndef SVNCLEAN_TARGETVER_H
+#define SVNCLEAN_TARGETVER_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
