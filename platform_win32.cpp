@@ -6,9 +6,27 @@
 #include <string>
 #include <vector>
 #include <windows.h>
+#include <shellapi.h>
 #include <shlwapi.h>
+#include <shlobj.h>
+#include <shobjidl.h>
+#include <atlbase.h>
 
 ////////////////////////////////////////////////////////////////////////////////
+
+extern const char g_directory_sep = '\\';
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool platform_init(void)
+{
+	return SUCCEEDED(CoInitialize(nullptr));
+}
+
+void platform_deinit(void)
+{
+	CoUninitialize();
+}
 
 std::string get_full_path(const char* path)
 {
@@ -27,9 +45,9 @@ std::string get_full_path(const char* path)
 		full_path = path;
 	}
 
-	std::replace(full_path.begin(), full_path.end(), '/', '\\');
+	std::replace(full_path.begin(), full_path.end(), '/', g_directory_sep);
 
-	while (!full_path.empty() && full_path.back() == '\\')
+	while (!full_path.empty() && full_path.back() == g_directory_sep)
 		full_path.pop_back();
 
 	return full_path;
@@ -93,7 +111,30 @@ std::vector<uint8_t> get_cmd_output(const char* dir, const char* p_cmd)
 
 void remove_files(const std::vector<std::string>& files)
 {
-	// TODO: delete unversioned files
+	std::vector<PIDLIST_ABSOLUTE> items;
+	items.reserve(files.size());
+
+	for (auto& file : files) {
+		PIDLIST_ABSOLUTE item = ILCreateFromPath(file.c_str());
+		if (item)
+			items.push_back(item);
+	}
+
+	if (items.empty())
+		return;
+
+	CComPtr<IShellItemArray> p_items;
+	if (SUCCEEDED(SHCreateShellItemArrayFromIDLists(items.size(), items.data(), &p_items))) {
+		CComPtr<IFileOperation> p_file_op;
+		if (SUCCEEDED(p_file_op.CoCreateInstance(CLSID_FileOperation)))
+			p_file_op->SetOperationFlags(FOF_NO_CONNECTED_ELEMENTS);
+
+			if (SUCCEEDED(p_file_op->DeleteItems(p_items)))
+				p_file_op->PerformOperations();
+	}
+
+	for (auto& item : items)
+		ILFree(item);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

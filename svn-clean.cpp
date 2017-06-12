@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -14,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 template <bool name_compare=false>
-static inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* b)
+inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* b)
 {
 	if (name_compare)
 		return strcasecmp(p_xml_obj->name(), b, p_xml_obj->name_size()) == 0;
@@ -26,6 +27,9 @@ int main(int argc, char* argv[])
 {
 	bool dry_run = false;
 	bool ignore_externals = false;
+
+	if (!platform_init())
+		return EXIT_FAILURE;
 
 	int i;
 	for (i = 1; i < argc; i++) {
@@ -81,8 +85,10 @@ int main(int argc, char* argv[])
 						if (p_item_attr && (is_equal(p_item_attr, "unversioned") || is_equal(p_item_attr, "ignored"))) {
 							rapidxml::xml_attribute<>* p_path_attr = p_entry_node->first_attribute("path");
 
-							if (p_path_attr)
-								files.emplace_back(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size());
+							if (p_path_attr) {
+								std::string path(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size());
+								files.push_back(working_dir + g_directory_sep + path);
+							}
 						}
 					}
 
@@ -99,6 +105,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	platform_deinit();
 	return 0;
 }
 

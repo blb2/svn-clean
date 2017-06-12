@@ -6,6 +6,19 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+extern const char g_directory_sep = '/';
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool platform_init(void)
+{
+	return true;
+}
+
+void platform_deinit(void)
+{
+}
+
 std::string get_full_path(const char* path)
 {
 	std::string full_path;
@@ -18,9 +31,9 @@ std::string get_full_path(const char* path)
 		full_path = path;
 	}
 
-	std::replace(full_path.begin(), full_path.end(), '/', '\\');
+	std::replace(full_path.begin(), full_path.end(), '\\', g_directory_sep);
 
-	while (!full_path.empty() && full_path.back() == '\\')
+	while (!full_path.empty() && full_path.back() == g_directory_sep)
 		full_path.pop_back();
 
 	return full_path;
