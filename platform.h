@@ -18,22 +18,27 @@ using char_type   = wchar_t;
 
 #define STR_LITERAL(s) L##s
 
-static inline string_type convert_string(bool is_utf8, const char* p_str)
+static inline std::wstring convert_string(bool is_utf8, const char* p_str)
 {
-	const UINT codepage = (is_utf8 ? CP_UTF8 : CP_ACP);
+	UINT codepage = (is_utf8 ? CP_UTF8 : CP_ACP);
+	int  wstr_len = MultiByteToWideChar(codepage, 0, p_str, -1, nullptr, 0);
 
-	const int wstr_size = MultiByteToWideChar(codepage, 0, p_str, -1, nullptr, 0);
-	if (wstr_size == 0)
-		return L"";
+	std::wstring wstr;
 
-	std::unique_ptr<wchar_t[]> p_wstr(new wchar_t[wstr_size]);
-	if (MultiByteToWideChar(codepage, 0, p_str, -1, p_wstr.get(), wstr_size) == 0)
-		return L"";
+	if (wstr_len > 0) {
+		std::unique_ptr<wchar_t[]> p_wstr(new wchar_t[wstr_len]);
 
-	return p_wstr.get();
+		wstr_len = MultiByteToWideChar(codepage, 0, p_str, -1, p_wstr.get(), wstr_len);
+		assert(wstr_len != 0);
+
+		wstr = p_wstr.get();
+	}
+
+	assert(*p_str == '\0' || !wstr.empty());
+	return wstr;
 }
 
-static inline string_type convert_string(bool is_utf8, std::string&& str)
+static inline std::wstring convert_string(bool is_utf8, std::string&& str)
 {
 	return convert_string(is_utf8, str.c_str());
 }
