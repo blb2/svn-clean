@@ -6,7 +6,7 @@
 #include "platform.h"
 
 #ifdef _WIN32
-#define strcasecmp _strnicmp
+#define strncasecmp _strnicmp
 #else
 #include <strings.h>
 #endif
@@ -19,7 +19,7 @@ inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* p_str)
 	if (name_compare)
 		return strncmp(p_xml_obj->name(), p_str, p_xml_obj->name_size()) == 0;
 	else
-		return strcasecmp(p_xml_obj->value(), p_str, p_xml_obj->value_size()) == 0;
+		return strncasecmp(p_xml_obj->value(), p_str, p_xml_obj->value_size()) == 0;
 }
 
 int main(int argc, char* argv[])
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 		if (dry_run) {
 			for (auto& file : files)
-				std::wcout << file << '\n';
+				printf(STR_FMT "\n", file.c_str());
 		} else {
 			remove_files(files);
 		}

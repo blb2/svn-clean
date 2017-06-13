@@ -23,7 +23,7 @@ std::string get_full_path(const std::string& path)
 {
 	std::string full_path;
 
-	char* p_full_path = realpath(path.c_str());
+	char* p_full_path = realpath(path.c_str(), nullptr);
 	if (p_full_path) {
 		full_path = p_full_path;
 		free(p_full_path);

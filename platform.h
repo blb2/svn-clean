@@ -17,6 +17,7 @@ using string_type = std::wstring;
 using char_type   = wchar_t;
 
 #define STR_LITERAL(s) L##s
+#define STR_FMT "%S"
 
 static inline std::wstring convert_string(bool is_utf8, const char* p_str)
 {
@@ -49,6 +50,7 @@ using string_type = std::string;
 using char_type   = char;
 
 #define STR_LITERAL(s) s
+#define STR_FMT "%ls"
 
 static inline string_type convert_string(bool is_utf8, const char* p_str)
 {
