@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 						if (p_item_attr && (is_equal(p_item_attr, "unversioned") || is_equal(p_item_attr, "ignored"))) {
 							rapidxml::xml_attribute<>* p_path_attr = p_entry_node->first_attribute("path");
 
-							if (p_path_attr)
+							if (p_path_attr && p_path_attr->value_size() != 0)
 								files.push_back(working_dir + g_directory_sep + convert_string(true, std::string(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size())));
 						}
 					}
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
 
 		if (dry_run) {
 			for (auto& file : files)
-				std::wcout << "Would remove file: " << file << '\n';
+				std::wcout << file << '\n';
 		} else {
 			remove_files(files);
 		}
