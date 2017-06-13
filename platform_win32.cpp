@@ -45,9 +45,9 @@ std::wstring get_full_path(const std::wstring& path)
 		full_path = path;
 	}
 
-	std::replace(full_path.begin(), full_path.end(), L'/', g_directory_sep);
+	std::replace(full_path.begin(), full_path.end(), L'/', L'\\');
 
-	while (!full_path.empty() && full_path.back() == g_directory_sep)
+	while (!full_path.empty() && full_path.back() == L'\\')
 		full_path.pop_back();
 
 	return full_path;

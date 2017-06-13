@@ -31,9 +31,9 @@ std::string get_full_path(const std::string& path)
 		full_path = path;
 	}
 
-	std::replace(full_path.begin(), full_path.end(), '\\', g_directory_sep);
+	std::replace(full_path.begin(), full_path.end(), '\\', '/');
 
-	while (!full_path.empty() && full_path.back() == g_directory_sep)
+	while (!full_path.empty() && full_path.back() == '/')
 		full_path.pop_back();
 
 	return full_path;
