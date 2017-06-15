@@ -1,8 +1,14 @@
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <array>
 #include <string>
 #include <vector>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <ftw.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,13 +47,82 @@ std::string get_full_path(const std::string& path)
 
 std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
 {
-	// TODO: execute command and capture its output
-	return std::vector<uint8_t>();
+	std::vector<uint8_t> output;
+
+	if (chdir(p_dir) == 0) {
+		int fd[2];
+
+		if (pipe(fd) == 0) {
+			std::string cmd = p_cmd;
+			std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
+
+			size_t space_pos = cmd.find(' ');
+			while (space_pos != std::string::npos) {
+				cmd[space_pos++] = '\0';
+				argv.push_back(const_cast<char*>(cmd.c_str() + space_pos));
+				space_pos = cmd.find(' ', space_pos);
+			}
+
+			argv.push_back(nullptr);
+
+			pid_t svn_pid = fork();
+			if (svn_pid == 0) {
+				dup2(fd[1], STDOUT_FILENO);
+
+				close(fd[0]);
+				close(fd[1]);
+
+				execvp(cmd.c_str(), argv.data());
+				exit(EXIT_FAILURE);
+			} else if (svn_pid < 0) {
+				// TODO: error forking process
+				close(fd[0]);
+				close(fd[1]);
+			} else {
+				close(fd[1]);
+
+				std::array<uint8_t, BUFSIZ> read_block;
+				while (true) {
+					ssize_t num_bytes_read = read(fd[0], read_block.data(), read_block.size());
+
+					if (num_bytes_read <= 0)
+						break;
+
+					output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
+				}
+
+				waitpid(svn_pid, nullptr, 0);
+				close(fd[0]);
+			}
+		} else {
+			// TODO: error creating pipe
+		}
+	} else {
+		// TODO: error changing working directory
+	}
+
+	return output;
+}
+
+int nftw_cb(const char* p_path, const struct stat* p_stat, int flags, struct FTW* p_ftw)
+{
+	if (flags == FTW_D || flags == FTW_DP) {
+		printf("rmdir %s\n", p_path);
+		return rmdir(p_path);
+	}
+
+	if (flags == FTW_F || flags == FTW_SL) {
+		printf("unlink %s\n", p_path);
+		return unlink(p_path);
+	}
+
+	return -1;
 }
 
 void remove_files(const std::vector<std::string>& files)
 {
-	// TODO: delete unversioned files
+	for (auto& file : files)
+		nftw(file.c_str(), nftw_cb, 64, FTW_DEPTH | FTW_PHYS);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

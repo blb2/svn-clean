@@ -50,7 +50,7 @@ using string_type = std::string;
 using char_type   = char;
 
 #define STR_LITERAL(s) s
-#define STR_FMT "%ls"
+#define STR_FMT "%s"
 
 static inline string_type convert_string(bool is_utf8, const char* p_str)
 {

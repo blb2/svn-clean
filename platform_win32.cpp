@@ -73,12 +73,13 @@ std::vector<uint8_t> get_cmd_output(const wchar_t* p_dir, const wchar_t* p_cmd)
 			si.hStdOutput = h_stdout_write;
 
 			std::wstring cmd = p_cmd;
-			std::array<uint8_t, BUFSIZ> read_block;
 
 			PROCESS_INFORMATION pi = { };
 			if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
 				CloseHandle(h_stdout_write);
 				h_stdout_write = INVALID_HANDLE_VALUE;
+
+				std::array<uint8_t, BUFSIZ> read_block;
 
 				DWORD num_bytes_read;
 				while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &num_bytes_read, nullptr) && num_bytes_read != 0)
@@ -101,6 +102,8 @@ std::vector<uint8_t> get_cmd_output(const wchar_t* p_dir, const wchar_t* p_cmd)
 
 			if (h_stdout_read != INVALID_HANDLE_VALUE)
 				CloseHandle(h_stdout_read);
+		} else {
+			// TODO: error creating pipe
 		}
 	} else {
 		// TODO: error changing working directory
