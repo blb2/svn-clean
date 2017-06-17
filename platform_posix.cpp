@@ -65,13 +65,14 @@ std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
 
 		pid_t svn_pid = fork();
 		if (svn_pid == 0) {
-			dup2(fd[1], STDOUT_FILENO);
+			if (dup2(fd[1], STDOUT_FILENO) == STDOUT_FILENO) {
+				close(fd[0]);
+				close(fd[1]);
 
-			close(fd[0]);
-			close(fd[1]);
+				if (chdir(p_dir) == 0)
+					execvp(cmd.c_str(), argv.data());
+			}
 
-			chdir(p_dir);
-			execvp(cmd.c_str(), argv.data());
 			exit(EXIT_FAILURE);
 		} else if (svn_pid < 0) {
 			// TODO: error forking process
@@ -82,12 +83,18 @@ std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
 
 			std::array<uint8_t, BUFSIZ> read_block;
 			while (true) {
-				ssize_t num_bytes_read = read(fd[0], read_block.data(), read_block.size());
+				ssize_t nbytes = read(fd[0], read_block.data(), read_block.size());
 
-				if (num_bytes_read <= 0)
+				if (nbytes < 0) {
+					if (errno == EINTR)
+						continue;
+
 					break;
+				} else if (nbytes == 0) {
+					break;
+				}
 
-				output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
+				output.insert(output.end(), read_block.begin(), read_block.begin() + nbytes);
 			}
 
 			waitpid(svn_pid, nullptr, 0);
