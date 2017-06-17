@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
 		svn_cmd += STR_LITERAL(" --ignore-externals");
 
 	std::vector<string_type> dirs;
-	for (i; i < argc; i++)
-		dirs.push_back(convert_string(false, argv[i]));
+	while (i < argc)
+		dirs.push_back(convert_string(false, argv[i++]));
 
 	if (dirs.empty())
 		dirs.emplace_back(STR_LITERAL("."));
