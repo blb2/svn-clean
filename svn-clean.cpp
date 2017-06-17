@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "externals/rapidxml/rapidxml.hpp"
+#include "externals/rapidxml/rapidxml_print.hpp"
 #include "platform.h"
 
 #ifdef _WIN32
@@ -24,6 +25,7 @@ inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* p_str)
 
 int main(int argc, char* argv[])
 {
+	bool debug = false;
 	bool dry_run = false;
 	bool ignore_externals = false;
 
@@ -39,6 +41,8 @@ int main(int argc, char* argv[])
 			dry_run = true;
 		else if (strcmp(argv[i], "-x") == 0)
 			ignore_externals = true;
+		else if (strcmp(argv[i], "-d") == 0)
+			debug = true;
 	}
 
 	string_type svn_cmd = STR_LITERAL("svn status --xml --no-ignore");
@@ -52,26 +56,34 @@ int main(int argc, char* argv[])
 	if (dirs.empty())
 		dirs.emplace_back(STR_LITERAL("."));
 
+	rapidxml::xml_document<> xdoc;
 	for (auto& dir : dirs) {
 		const string_type working_dir = get_full_path(dir);
 
-		std::vector<uint8_t> svn_out = get_cmd_output(working_dir.c_str(), svn_cmd.c_str());
-		if (svn_out.empty())
+		std::vector<uint8_t> svn_xml = get_cmd_output(working_dir.c_str(), svn_cmd.c_str());
+		if (svn_xml.empty())
 			continue;
 
-		if (svn_out.back() != '\0')
-			svn_out.push_back('\0');
+		if (svn_xml.back() != '\0')
+			svn_xml.push_back('\0');
 
-		rapidxml::xml_document<> xml;
 		try {
-			xml.parse<rapidxml::parse_fastest>(reinterpret_cast<char*>(svn_out.data()));
+			xdoc.parse<rapidxml::parse_fastest>(reinterpret_cast<char*>(svn_xml.data()));
 		} catch (...) {
-			xml.clear();
+			xdoc.clear();
+		}
+
+		if (debug) {
+			std::string xml;
+			rapidxml::print(std::back_inserter(xml), xdoc);
+			printf("dir: " STR_FMT "\n", working_dir.c_str());
+			printf("cmd: " STR_FMT "\n", svn_cmd.c_str());
+			printf("%s\n", xml.c_str());
+			continue;
 		}
 
 		std::vector<string_type> files;
-
-		rapidxml::xml_node<>* p_root_node = xml.first_node("status");
+		rapidxml::xml_node<>* p_root_node = xdoc.first_node("status");
 		if (p_root_node) {
 			rapidxml::xml_node<>* p_target_node = p_root_node->first_node("target");
 
