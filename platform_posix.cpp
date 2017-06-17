@@ -49,56 +49,52 @@ std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
 {
 	std::vector<uint8_t> output;
 
-	if (chdir(p_dir) == 0) {
-		int fd[2];
+	int fd[2];
+	if (pipe(fd) == 0) {
+		std::string cmd = p_cmd;
+		std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
 
-		if (pipe(fd) == 0) {
-			std::string cmd = p_cmd;
-			std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
+		size_t space_pos = cmd.find(' ');
+		while (space_pos != std::string::npos) {
+			cmd[space_pos++] = '\0';
+			argv.push_back(const_cast<char*>(cmd.c_str() + space_pos));
+			space_pos = cmd.find(' ', space_pos);
+		}
 
-			size_t space_pos = cmd.find(' ');
-			while (space_pos != std::string::npos) {
-				cmd[space_pos++] = '\0';
-				argv.push_back(const_cast<char*>(cmd.c_str() + space_pos));
-				space_pos = cmd.find(' ', space_pos);
-			}
+		argv.push_back(nullptr);
 
-			argv.push_back(nullptr);
+		pid_t svn_pid = fork();
+		if (svn_pid == 0) {
+			dup2(fd[1], STDOUT_FILENO);
 
-			pid_t svn_pid = fork();
-			if (svn_pid == 0) {
-				dup2(fd[1], STDOUT_FILENO);
+			close(fd[0]);
+			close(fd[1]);
 
-				close(fd[0]);
-				close(fd[1]);
-
-				execvp(cmd.c_str(), argv.data());
-				exit(EXIT_FAILURE);
-			} else if (svn_pid < 0) {
-				// TODO: error forking process
-				close(fd[0]);
-				close(fd[1]);
-			} else {
-				close(fd[1]);
-
-				std::array<uint8_t, BUFSIZ> read_block;
-				while (true) {
-					ssize_t num_bytes_read = read(fd[0], read_block.data(), read_block.size());
-
-					if (num_bytes_read <= 0)
-						break;
-
-					output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
-				}
-
-				waitpid(svn_pid, nullptr, 0);
-				close(fd[0]);
-			}
+			chdir(p_dir);
+			execvp(cmd.c_str(), argv.data());
+			exit(EXIT_FAILURE);
+		} else if (svn_pid < 0) {
+			// TODO: error forking process
+			close(fd[0]);
+			close(fd[1]);
 		} else {
-			// TODO: error creating pipe
+			close(fd[1]);
+
+			std::array<uint8_t, BUFSIZ> read_block;
+			while (true) {
+				ssize_t num_bytes_read = read(fd[0], read_block.data(), read_block.size());
+
+				if (num_bytes_read <= 0)
+					break;
+
+				output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
+			}
+
+			waitpid(svn_pid, nullptr, 0);
+			close(fd[0]);
 		}
 	} else {
-		// TODO: error changing working directory
+		// TODO: error creating pipe
 	}
 
 	return output;

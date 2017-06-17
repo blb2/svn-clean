@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 #include <windows.h>
@@ -57,56 +58,52 @@ std::vector<uint8_t> get_cmd_output(const wchar_t* p_dir, const wchar_t* p_cmd)
 {
 	std::vector<uint8_t> output;
 
-	if (SetCurrentDirectory(p_dir)) {
-		SECURITY_ATTRIBUTES stdout_sec_attrs = { };
-		stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
-		stdout_sec_attrs.bInheritHandle = TRUE;
+	SECURITY_ATTRIBUTES stdout_sec_attrs = { };
+	stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
+	stdout_sec_attrs.bInheritHandle = TRUE;
 
-		HANDLE h_stdout_read = INVALID_HANDLE_VALUE, h_stdout_write = INVALID_HANDLE_VALUE;
-		if (CreatePipe(&h_stdout_read, &h_stdout_write, &stdout_sec_attrs, 0)) {
-			SetHandleInformation(h_stdout_read, HANDLE_FLAG_INHERIT, 0);
+	HANDLE h_stdout_read = INVALID_HANDLE_VALUE, h_stdout_write = INVALID_HANDLE_VALUE;
+	if (CreatePipe(&h_stdout_read, &h_stdout_write, &stdout_sec_attrs, 0)) {
+		SetHandleInformation(h_stdout_read, HANDLE_FLAG_INHERIT, 0);
 
-			STARTUPINFO si = { sizeof(STARTUPINFO) };
-			si.dwFlags = STARTF_USESTDHANDLES;
-			si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-			si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-			si.hStdOutput = h_stdout_write;
+		STARTUPINFO si = { sizeof(STARTUPINFO) };
+		si.dwFlags = STARTF_USESTDHANDLES;
+		si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+		si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+		si.hStdOutput = h_stdout_write;
 
-			std::wstring cmd = p_cmd;
+		std::wstring cmd = p_cmd;
 
-			PROCESS_INFORMATION pi = { };
-			if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
-				CloseHandle(h_stdout_write);
-				h_stdout_write = INVALID_HANDLE_VALUE;
+		PROCESS_INFORMATION pi = { };
+		if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, p_dir, &si, &pi)) {
+			CloseHandle(h_stdout_write);
+			h_stdout_write = INVALID_HANDLE_VALUE;
 
-				std::array<uint8_t, BUFSIZ> read_block;
+			std::array<uint8_t, BUFSIZ> read_block;
 
-				DWORD num_bytes_read;
-				while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &num_bytes_read, nullptr) && num_bytes_read != 0)
-					output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
+			DWORD num_bytes_read;
+			while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &num_bytes_read, nullptr) && num_bytes_read != 0)
+				output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
 
-				WaitForSingleObject(pi.hProcess, INFINITE);
+			WaitForSingleObject(pi.hProcess, INFINITE);
 
-				DWORD exit_code;
-				GetExitCodeProcess(pi.hProcess, &exit_code);
-				assert(exit_code == 0);
+			DWORD exit_code;
+			GetExitCodeProcess(pi.hProcess, &exit_code);
+			assert(exit_code == 0);
 
-				CloseHandle(pi.hThread);
-				CloseHandle(pi.hProcess);
-			} else {
-				// TODO: error executing command
-			}
-
-			if (h_stdout_write != INVALID_HANDLE_VALUE)
-				CloseHandle(h_stdout_write);
-
-			if (h_stdout_read != INVALID_HANDLE_VALUE)
-				CloseHandle(h_stdout_read);
+			CloseHandle(pi.hThread);
+			CloseHandle(pi.hProcess);
 		} else {
-			// TODO: error creating pipe
+			// TODO: error executing command
 		}
+
+		if (h_stdout_write != INVALID_HANDLE_VALUE)
+			CloseHandle(h_stdout_write);
+
+		if (h_stdout_read != INVALID_HANDLE_VALUE)
+			CloseHandle(h_stdout_read);
 	} else {
-		// TODO: error changing working directory
+		// TODO: error creating pipe
 	}
 
 	return output;
