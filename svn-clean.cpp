@@ -23,6 +23,40 @@ inline bool is_equal(const rapidxml::xml_base<>* p_xml_obj, const char* p_str)
 		return strncasecmp(p_xml_obj->value(), p_str, p_xml_obj->value_size()) == 0;
 }
 
+template <typename T>
+std::vector<string_type> parse_for_files(const string_type& working_dir, rapidxml::xml_document<T>& xdoc)
+{
+	std::vector<string_type> files;
+
+	rapidxml::xml_node<T>* p_root_node = xdoc.first_node("status");
+	if (p_root_node) {
+		rapidxml::xml_node<T>* p_target_node = p_root_node->first_node("target");
+
+		if (p_target_node) {
+			rapidxml::xml_node<T>* p_entry_node = p_target_node->first_node("entry");
+
+			while (p_entry_node) {
+				rapidxml::xml_node<T>* p_status_node = p_entry_node->first_node("wc-status");
+
+				if (p_status_node) {
+					rapidxml::xml_attribute<T>* p_item_attr = p_status_node->first_attribute("item");
+
+					if (p_item_attr && (is_equal(p_item_attr, "unversioned") || is_equal(p_item_attr, "ignored"))) {
+						rapidxml::xml_attribute<T>* p_path_attr = p_entry_node->first_attribute("path");
+
+						if (p_path_attr && p_path_attr->value_size() != 0)
+							files.push_back(working_dir + g_directory_sep + convert_string(true, std::string(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size())));
+					}
+				}
+
+				p_entry_node = p_entry_node->next_sibling("entry");
+			}
+		}
+	}
+
+	return files;
+}
+
 int main(int argc, char* argv[])
 {
 	bool debug = false;
@@ -82,32 +116,7 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		std::vector<string_type> files;
-		rapidxml::xml_node<>* p_root_node = xdoc.first_node("status");
-		if (p_root_node) {
-			rapidxml::xml_node<>* p_target_node = p_root_node->first_node("target");
-
-			if (p_target_node) {
-				rapidxml::xml_node<>* p_entry_node = p_target_node->first_node("entry");
-
-				while (p_entry_node) {
-					rapidxml::xml_node<>* p_status_node = p_entry_node->first_node("wc-status");
-
-					if (p_status_node) {
-						rapidxml::xml_attribute<>* p_item_attr = p_status_node->first_attribute("item");
-
-						if (p_item_attr && (is_equal(p_item_attr, "unversioned") || is_equal(p_item_attr, "ignored"))) {
-							rapidxml::xml_attribute<>* p_path_attr = p_entry_node->first_attribute("path");
-
-							if (p_path_attr && p_path_attr->value_size() != 0)
-								files.push_back(working_dir + g_directory_sep + convert_string(true, std::string(p_path_attr->value(), p_path_attr->value() + p_path_attr->value_size())));
-						}
-					}
-
-					p_entry_node = p_entry_node->next_sibling("entry");
-				}
-			}
-		}
+		std::vector<string_type> files = parse_for_files(working_dir, xdoc);
 
 		if (dry_run) {
 			for (auto& file : files)
