@@ -14,6 +14,8 @@ else
 	CXXFLAGS += -O3 -DNDEBUG
 endif
 
+CXXFLAGS += -DPUGIXML_HEADER_ONLY
+
 .SUFFIXES:
 .SUFFIXES: .cpp .d .h .o
 
