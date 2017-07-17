@@ -126,7 +126,8 @@ int nftw_cb(const char* p_path, const struct stat* p_stat, int flags, struct FTW
 void remove_files(const std::vector<std::string>& files)
 {
 	for (auto& file : files)
-		nftw(file.c_str(), nftw_cb, 64, FTW_DEPTH | FTW_PHYS);
+		if (nftw(file.c_str(), nftw_cb, 64, FTW_DEPTH | FTW_PHYS) < 0 && errno == ENOTDIR)
+			nftw_cb(file.c_str(), nullptr, FTW_F, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
