@@ -2,7 +2,7 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include "externals/pugixml/src/pugixml.hpp"
+#include "external/pugixml/src/pugixml.hpp"
 #include "platform.h"
 
 ////////////////////////////////////////////////////////////////////////////////
