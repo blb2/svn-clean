@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstring>
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include "external/pugixml/src/pugixml.hpp"
@@ -27,9 +28,16 @@ std::vector<string_type> parse_for_files(const string_type& working_dir, const p
 	std::vector<string_type> files;
 
 	const char* xpath_query = "/status/target/entry[./wc-status/@item=\"unversioned\" or ./wc-status/@item=\"ignored\"]/@path";
-	for (auto& node : xdoc.select_nodes(xpath_query))
-		if (node.attribute())
-			files.push_back(working_dir + g_directory_sep + convert_string(true, std::string(node.attribute().value())));
+	for (auto& node : xdoc.select_nodes(xpath_query)) {
+		if (node.attribute()) {
+			string_type path = working_dir + g_directory_sep + convert_string(true, std::string(node.attribute().value()));
+
+			if (g_directory_sep != g_directory_sep_other)
+				std::replace(path.begin(), path.end(), g_directory_sep_other, g_directory_sep);
+
+			files.push_back(std::move(path));
+		}
+	}
 
 	return files;
 }

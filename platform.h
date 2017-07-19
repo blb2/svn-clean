@@ -67,6 +67,7 @@ static inline string_type convert_string(bool is_utf8, std::string&& str)
 ////////////////////////////////////////////////////////////////////////////////
 
 extern const char_type g_directory_sep;
+extern const char_type g_directory_sep_other;
 
 bool platform_init(void);
 void platform_deinit(void);
