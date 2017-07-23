@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cerrno>
 #include <cstdint>
 #include <cstdio>
@@ -47,40 +48,47 @@ std::string get_full_path(const std::string& path)
 	return full_path;
 }
 
-std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
+bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_output)
 {
-	std::vector<uint8_t> output;
+	bool status = false;
 
 	int fd[2];
-	if (pipe(fd) == 0) {
-		std::string cmd = p_cmd;
-		std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
+	if (p_output && pipe(fd) < 0)
+		return status;
 
-		size_t space_pos = cmd.find(' ');
-		while (space_pos != std::string::npos) {
-			cmd[space_pos++] = '\0';
-			argv.push_back(const_cast<char*>(cmd.c_str() + space_pos));
-			space_pos = cmd.find(' ', space_pos);
-		}
+	std::string cmd = p_cmd;
+	std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
 
-		argv.push_back(nullptr);
+	size_t space_pos = cmd.find(' ');
+	while (space_pos != std::string::npos) {
+		cmd[space_pos++] = '\0';
+		argv.push_back(const_cast<char*>(cmd.c_str() + space_pos));
+		space_pos = cmd.find(' ', space_pos);
+	}
 
-		pid_t svn_pid = fork();
-		if (svn_pid == 0) {
-			if (dup2(fd[1], STDOUT_FILENO) == STDOUT_FILENO) {
-				close(fd[0]);
-				close(fd[1]);
+	argv.push_back(nullptr);
 
-				if (chdir(p_dir) == 0)
-					execvp(cmd.c_str(), argv.data());
-			}
+	pid_t cmd_pid = fork();
+	if (cmd_pid == 0) {
+		if (p_output) {
+			if (dup2(fd[1], STDOUT_FILENO) != STDOUT_FILENO)
+				exit(EXIT_FAILURE);
 
-			exit(EXIT_FAILURE);
-		} else if (svn_pid < 0) {
-			// TODO: error forking process
 			close(fd[0]);
 			close(fd[1]);
-		} else {
+		}
+
+		if (chdir(p_dir) == 0)
+			execvp(cmd.c_str(), argv.data());
+
+		exit(EXIT_FAILURE);
+	} else if (cmd_pid < 0) {
+		if (p_output) {
+			close(fd[0]);
+			close(fd[1]);
+		}
+	} else {
+		if (p_output) {
 			close(fd[1]);
 
 			std::array<uint8_t, BUFSIZ> read_block;
@@ -96,17 +104,21 @@ std::vector<uint8_t> get_cmd_output(const char* p_dir, const char* p_cmd)
 					break;
 				}
 
-				output.insert(output.end(), read_block.begin(), read_block.begin() + nbytes);
+				p_output->insert(p_output->end(), read_block.begin(), read_block.begin() + nbytes);
 			}
-
-			waitpid(svn_pid, nullptr, 0);
-			close(fd[0]);
 		}
-	} else {
-		// TODO: error creating pipe
+
+		int exit_code;
+		waitpid(cmd_pid, &exit_code, 0);
+
+		if (p_output)
+			close(fd[0]);
+
+		status = (exit_code == 0);
+		assert(status);
 	}
 
-	return output;
+	return status;
 }
 
 int nftw_cb(const char* p_path, const struct stat* p_stat, int flags, struct FTW* p_ftw)

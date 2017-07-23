@@ -23,7 +23,7 @@ private:
 	std::string m_xml;
 };
 
-std::vector<string_type> parse_for_files(const string_type& working_dir, const pugi::xml_document& xdoc)
+std::vector<string_type> find_unversioned_files(const string_type& working_dir, const pugi::xml_document& xdoc)
 {
 	std::vector<string_type> files;
 
@@ -42,11 +42,30 @@ std::vector<string_type> parse_for_files(const string_type& working_dir, const p
 	return files;
 }
 
+std::vector<string_type> find_externals(const pugi::xml_document& xdoc)
+{
+	std::vector<string_type> files;
+
+	const char* xpath_query = "/status/target/entry[./wc-status/@item=\"external\"]/@path";
+	for (auto& node : xdoc.select_nodes(xpath_query)) {
+		if (node.attribute()) {
+			string_type path = convert_string(true, std::string(node.attribute().value()));
+
+			if (g_directory_sep != g_directory_sep_other)
+				std::replace(path.begin(), path.end(), g_directory_sep_other, g_directory_sep);
+
+			files.push_back(std::move(path));
+		}
+	}
+
+	return files;
+}
+
 int main(int argc, char* argv[])
 {
 	bool debug = false;
 	bool dry_run = false;
-	bool ignore_externals = false;
+	bool revert = false;
 
 	if (!platform_init())
 		return EXIT_FAILURE;
@@ -58,15 +77,11 @@ int main(int argc, char* argv[])
 
 		if (strcmp(argv[i], "-n") == 0)
 			dry_run = true;
-		else if (strcmp(argv[i], "-x") == 0)
-			ignore_externals = true;
 		else if (strcmp(argv[i], "-d") == 0)
 			debug = true;
+		else if (strcmp(argv[i], "-r") == 0)
+			revert = true;
 	}
-
-	string_type svn_cmd = STR_LITERAL("svn status --xml --no-ignore");
-	if (ignore_externals)
-		svn_cmd += STR_LITERAL(" --ignore-externals");
 
 	std::vector<string_type> dirs;
 	while (i < argc)
@@ -77,16 +92,17 @@ int main(int argc, char* argv[])
 
 	pugi::xml_document xdoc;
 	for (auto& dir : dirs) {
+		const string_type svn_status_cmd = STR_LITERAL("svn status --xml --no-ignore");
 		const string_type working_dir = get_full_path(dir);
 
-		std::vector<uint8_t> svn_xml = get_cmd_output(working_dir.c_str(), svn_cmd.c_str());
-		if (svn_xml.empty())
+		std::vector<uint8_t> svn_status_xml;
+		if (!run_cmd(working_dir.c_str(), svn_status_cmd.c_str(), &svn_status_xml) || svn_status_xml.empty())
 			continue;
 
-		if (svn_xml.back() != '\0')
-			svn_xml.push_back('\0');
+		if (svn_status_xml.back() != '\0')
+			svn_status_xml.push_back('\0');
 
-		if (!xdoc.load_buffer_inplace(svn_xml.data(), svn_xml.size()))
+		if (!xdoc.load_buffer_inplace(svn_status_xml.data(), svn_status_xml.size()))
 			xdoc.reset();
 
 		if (debug) {
@@ -94,18 +110,29 @@ int main(int argc, char* argv[])
 			xdoc.save(writer, "  ");
 
 			printf("dir: " STR_FMT "\n", working_dir.c_str());
-			printf("cmd: " STR_FMT "\n", svn_cmd.c_str());
+			printf("cmd: " STR_FMT "\n", svn_status_cmd.c_str());
+			printf("revert: %s\n", (revert ? "true" : "false"));
 			printf("%s\n", writer.str().c_str());
 			continue;
 		}
 
-		std::vector<string_type> files = parse_for_files(working_dir, xdoc);
+		std::vector<string_type> unversioned_files = find_unversioned_files(working_dir, xdoc);
 
 		if (dry_run) {
-			for (auto& file : files)
+			for (auto& file : unversioned_files)
 				printf(STR_FMT "\n", file.c_str());
 		} else {
-			remove_files(files);
+			if (revert) {
+				const string_type svn_revert_cmd_base = STR_LITERAL("svn revert --recursive ");
+
+				std::vector<string_type> externals = find_externals(xdoc);
+				for (auto& external : externals)
+					run_cmd(working_dir.c_str(), (svn_revert_cmd_base + external).c_str());
+
+				run_cmd(working_dir.c_str(), (svn_revert_cmd_base + STR_LITERAL(".")).c_str());
+			}
+
+			remove_files(unversioned_files);
 		}
 	}
 
