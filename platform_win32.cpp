@@ -22,6 +22,10 @@ extern const wchar_t g_directory_sep_other = L'/';
 
 bool platform_init(void)
 {
+#ifndef NDEBUG
+	_set_error_mode(_OUT_TO_MSGBOX);
+#endif
+
 	return SUCCEEDED(CoInitialize(nullptr));
 }
 
@@ -55,59 +59,64 @@ std::wstring get_full_path(const std::wstring& path)
 	return full_path;
 }
 
-std::vector<uint8_t> get_cmd_output(const wchar_t* p_dir, const wchar_t* p_cmd)
+bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p_output)
 {
-	std::vector<uint8_t> output;
-
-	SECURITY_ATTRIBUTES stdout_sec_attrs = { };
-	stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
-	stdout_sec_attrs.bInheritHandle = TRUE;
+	bool status = false;
 
 	HANDLE h_stdout_read = INVALID_HANDLE_VALUE, h_stdout_write = INVALID_HANDLE_VALUE;
-	if (CreatePipe(&h_stdout_read, &h_stdout_write, &stdout_sec_attrs, 0)) {
+	if (p_output) {
+		SECURITY_ATTRIBUTES stdout_sec_attrs = { };
+		stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
+		stdout_sec_attrs.bInheritHandle = TRUE;
+
+		if (!CreatePipe(&h_stdout_read, &h_stdout_write, &stdout_sec_attrs, 0))
+			return status;
+
 		SetHandleInformation(h_stdout_read, HANDLE_FLAG_INHERIT, 0);
-
-		STARTUPINFO si = { sizeof(STARTUPINFO) };
-		si.dwFlags = STARTF_USESTDHANDLES;
-		si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-		si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-		si.hStdOutput = h_stdout_write;
-
-		std::wstring cmd = p_cmd;
-
-		PROCESS_INFORMATION pi = { };
-		if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, p_dir, &si, &pi)) {
-			CloseHandle(h_stdout_write);
-			h_stdout_write = INVALID_HANDLE_VALUE;
-
-			std::array<uint8_t, BUFSIZ> read_block;
-
-			DWORD num_bytes_read;
-			while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &num_bytes_read, nullptr) && num_bytes_read != 0)
-				output.insert(output.end(), read_block.begin(), read_block.begin() + num_bytes_read);
-
-			WaitForSingleObject(pi.hProcess, INFINITE);
-
-			DWORD exit_code;
-			GetExitCodeProcess(pi.hProcess, &exit_code);
-			assert(exit_code == 0);
-
-			CloseHandle(pi.hThread);
-			CloseHandle(pi.hProcess);
-		} else {
-			// TODO: error executing command
-		}
-
-		if (h_stdout_write != INVALID_HANDLE_VALUE)
-			CloseHandle(h_stdout_write);
-
-		if (h_stdout_read != INVALID_HANDLE_VALUE)
-			CloseHandle(h_stdout_read);
-	} else {
-		// TODO: error creating pipe
 	}
 
-	return output;
+	STARTUPINFO si = { sizeof(STARTUPINFO) };
+	si.dwFlags = STARTF_USESTDHANDLES;
+	si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+	si.hStdOutput = (p_output ? h_stdout_write : GetStdHandle(STD_OUTPUT_HANDLE));
+
+	std::wstring cmd = p_cmd;
+
+	PROCESS_INFORMATION pi = { };
+	if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, p_dir, &si, &pi)) {
+		if (h_stdout_write != INVALID_HANDLE_VALUE) {
+			CloseHandle(h_stdout_write);
+			h_stdout_write = INVALID_HANDLE_VALUE;
+		}
+
+		if (p_output) {
+			std::array<uint8_t, BUFSIZ> read_block;
+
+			DWORD nbytes;
+			while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &nbytes, nullptr) && nbytes != 0)
+				p_output->insert(p_output->end(), read_block.begin(), read_block.begin() + nbytes);
+		}
+
+		WaitForSingleObject(pi.hProcess, INFINITE);
+
+		DWORD exit_code;
+		GetExitCodeProcess(pi.hProcess, &exit_code);
+
+		CloseHandle(pi.hThread);
+		CloseHandle(pi.hProcess);
+
+		status = (exit_code == 0);
+		assert(status);
+	}
+
+	if (h_stdout_write != INVALID_HANDLE_VALUE)
+		CloseHandle(h_stdout_write);
+
+	if (h_stdout_read != INVALID_HANDLE_VALUE)
+		CloseHandle(h_stdout_read);
+
+	return status;
 }
 
 void remove_files(const std::vector<std::wstring>& files)

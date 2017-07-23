@@ -73,7 +73,7 @@ bool platform_init(void);
 void platform_deinit(void);
 
 string_type get_full_path(const string_type& path);
-std::vector<uint8_t> get_cmd_output(const char_type* p_dir, const char_type* p_cmd);
+bool run_cmd(const char_type* p_dir, const char_type* p_cmd, std::vector<uint8_t>* p_output=nullptr);
 void remove_files(const std::vector<string_type>& files);
 
 ////////////////////////////////////////////////////////////////////////////////

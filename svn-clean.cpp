@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
 {
 	bool debug = false;
 	bool dry_run = false;
+	bool revert = false;
 	bool ignore_externals = false;
 
 	if (!platform_init())
@@ -62,11 +63,13 @@ int main(int argc, char* argv[])
 			ignore_externals = true;
 		else if (strcmp(argv[i], "-d") == 0)
 			debug = true;
+		else if (strcmp(argv[i], "-r") == 0)
+			revert = true;
 	}
 
-	string_type svn_cmd = STR_LITERAL("svn status --xml --no-ignore");
+	string_type svn_status_cmd = STR_LITERAL("svn status --xml --no-ignore");
 	if (ignore_externals)
-		svn_cmd += STR_LITERAL(" --ignore-externals");
+		svn_status_cmd += STR_LITERAL(" --ignore-externals");
 
 	std::vector<string_type> dirs;
 	while (i < argc)
@@ -79,14 +82,14 @@ int main(int argc, char* argv[])
 	for (auto& dir : dirs) {
 		const string_type working_dir = get_full_path(dir);
 
-		std::vector<uint8_t> svn_xml = get_cmd_output(working_dir.c_str(), svn_cmd.c_str());
-		if (svn_xml.empty())
+		std::vector<uint8_t> svn_status_xml;
+		if (!run_cmd(working_dir.c_str(), svn_status_cmd.c_str(), &svn_status_xml) || svn_status_xml.empty())
 			continue;
 
-		if (svn_xml.back() != '\0')
-			svn_xml.push_back('\0');
+		if (svn_status_xml.back() != '\0')
+			svn_status_xml.push_back('\0');
 
-		if (!xdoc.load_buffer_inplace(svn_xml.data(), svn_xml.size()))
+		if (!xdoc.load_buffer_inplace(svn_status_xml.data(), svn_status_xml.size()))
 			xdoc.reset();
 
 		if (debug) {
@@ -94,7 +97,8 @@ int main(int argc, char* argv[])
 			xdoc.save(writer, "  ");
 
 			printf("dir: " STR_FMT "\n", working_dir.c_str());
-			printf("cmd: " STR_FMT "\n", svn_cmd.c_str());
+			printf("cmd: " STR_FMT "\n", svn_status_cmd.c_str());
+			printf("revert: %s\n", (revert ? "true" : "false"));
 			printf("%s\n", writer.str().c_str());
 			continue;
 		}
@@ -105,6 +109,11 @@ int main(int argc, char* argv[])
 			for (auto& file : files)
 				printf(STR_FMT "\n", file.c_str());
 		} else {
+			if (revert) {
+				const char_type* svn_revert_cmd = STR_LITERAL("svn revert --recursive .");
+				run_cmd(working_dir.c_str(), svn_revert_cmd);
+			}
+
 			remove_files(files);
 		}
 	}
