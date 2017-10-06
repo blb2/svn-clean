@@ -59,11 +59,23 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 	std::string cmd = p_cmd;
 	std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
 
-	size_t space_pos = cmd.find(' ');
-	while (space_pos != std::string::npos) {
-		cmd[space_pos++] = '\0';
-		argv.push_back(const_cast<char*>(cmd.c_str() + space_pos));
-		space_pos = cmd.find(' ', space_pos);
+	size_t pos = cmd.find(' ');
+	while (pos != std::string::npos) {
+		cmd[pos++] = '\0';
+
+		while (pos != cmd.length() && cmd[pos] == ' ')
+			cmd[pos++] = '\0';
+
+		if (pos == cmd.length())
+			break;
+
+		if (cmd[pos] == '"') {
+			argv.push_back(const_cast<char*>(cmd.c_str() + ++pos));
+			pos = cmd.find('"', pos);
+		} else {
+			argv.push_back(const_cast<char*>(cmd.c_str() + pos));
+			pos = cmd.find(' ', pos);
+		}
 	}
 
 	argv.push_back(nullptr);
