@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 
 				std::vector<string_type> externals = find_externals(xdoc);
 				for (auto& external : externals)
-					run_cmd(working_dir.c_str(), (svn_revert_cmd_base + external).c_str());
+					run_cmd(working_dir.c_str(), (svn_revert_cmd_base + STR_LITERAL('"') + external + STR_LITERAL('"')).c_str());
 
 				run_cmd(working_dir.c_str(), (svn_revert_cmd_base + STR_LITERAL(".")).c_str());
 			}
