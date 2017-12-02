@@ -1,5 +1,5 @@
 svn-clean
-================
+=========
 A utility for cleaning a SVN checkout by removing files that are not part of
 the repository.
 
