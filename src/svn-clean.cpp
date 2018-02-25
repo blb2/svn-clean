@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include "external/pugixml/src/pugixml.hpp"
+#include "../external/pugixml/src/pugixml.hpp"
 #include "platform.h"
 
 ////////////////////////////////////////////////////////////////////////////////

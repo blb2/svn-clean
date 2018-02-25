@@ -1,23 +1,24 @@
-CXX      = g++
-CXXFLAGS = -std=c++11
-RM       = @rm
-MKDIR    = @mkdir -p
-NAME     = svn-clean
-SRCS     = svn-clean.cpp platform_posix.cpp
-OBJSDIR  = obj
-OBJS     = $(addprefix $(OBJSDIR)/,$(SRCS:.cpp=.o))
-DEPS     = $(addprefix $(OBJSDIR)/,$(SRCS:.cpp=.d))
+CXX    ?= g++
+RM      = @rm
+MKDIR   = @mkdir -p
+NAME    = svn-clean
+SRCS    = src/svn-clean.cpp src/platform_posix.cpp
+OBJSDIR = obj
+OBJS    = $(addprefix $(OBJSDIR)/,$(SRCS:.cpp=.o))
+DEPS    = $(addprefix $(OBJSDIR)/,$(SRCS:.cpp=.d))
+
+override CXXFLAGS += -std=c++11
 
 ifeq ($(DEBUG),1)
-	CXXFLAGS += -g
+override CXXFLAGS += -g
 else
-	CXXFLAGS += -O3 -DNDEBUG
+override CXXFLAGS += -O3 -DNDEBUG
 endif
 
-CXXFLAGS += -DPUGIXML_HEADER_ONLY
+override CXXFLAGS += -DPUGIXML_HEADER_ONLY
 
 .SUFFIXES:
-.SUFFIXES: .cpp .d .h .o
+.SUFFIXES: .cpp .h .o
 
 .PHONY: all
 all: $(NAME)
