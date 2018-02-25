@@ -18,7 +18,7 @@ endif
 override CXXFLAGS += -DPUGIXML_HEADER_ONLY
 
 .SUFFIXES:
-.SUFFIXES: .cpp .h .o
+.SUFFIXES: .d .cpp .h .o
 
 .PHONY: all
 all: $(NAME)
