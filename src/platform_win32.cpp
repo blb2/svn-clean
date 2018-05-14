@@ -134,7 +134,7 @@ void remove_files(const std::vector<std::wstring>& files)
 		return;
 
 	CComPtr<IShellItemArray> p_items;
-	if (SUCCEEDED(SHCreateShellItemArrayFromIDLists(items.size(), items.data(), &p_items))) {
+	if (SUCCEEDED(SHCreateShellItemArrayFromIDLists((UINT)items.size(), items.data(), &p_items))) {
 		CComPtr<IFileOperation> p_file_op;
 		if (SUCCEEDED(p_file_op.CoCreateInstance(CLSID_FileOperation)))
 			if (SUCCEEDED(p_file_op->DeleteItems(p_items)))

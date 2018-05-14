@@ -8,7 +8,7 @@ The current project page is located here:
 
 Building
 --------
-For building on Windows, a project file for Visual Studio 2013.5 is provided.
+For building on Windows, a project file for Visual Studio 2017 is provided.
 
 While building on a POSIX platform, such as Linux or macOS, the `make` command
 along with any C++11 compliant compiler should do.  Here's an example of
