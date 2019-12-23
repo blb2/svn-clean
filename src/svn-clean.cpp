@@ -5,8 +5,9 @@
 #include <vector>
 #include "../external/pugixml/src/pugixml.hpp"
 #include "platform.h"
+#include "version.h"
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct xml_writer : public pugi::xml_writer {
 	const std::string& str(void) const
@@ -63,9 +64,9 @@ std::vector<string_type> find_externals(const pugi::xml_document& xdoc)
 
 int main(int argc, char* argv[])
 {
-	bool debug = false;
+	bool debug   = false;
 	bool dry_run = false;
-	bool revert = false;
+	bool revert  = false;
 
 	if (!platform_init())
 		return EXIT_FAILURE;
@@ -93,7 +94,7 @@ int main(int argc, char* argv[])
 	pugi::xml_document xdoc;
 	for (auto& dir : dirs) {
 		const string_type svn_status_cmd = STR_LITERAL("svn status --xml --no-ignore");
-		const string_type working_dir = get_full_path(dir);
+		const string_type working_dir    = get_full_path(dir);
 
 		std::vector<uint8_t> svn_status_xml;
 		if (!run_cmd(working_dir.c_str(), svn_status_cmd.c_str(), &svn_status_xml) || svn_status_xml.empty())
@@ -140,4 +141,4 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////

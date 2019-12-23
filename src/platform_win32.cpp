@@ -13,12 +13,12 @@
 #include <shobjidl.h>
 #include <atlbase.h>
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern const wchar_t g_directory_sep = L'\\';
 extern const wchar_t g_directory_sep_other = L'/';
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool platform_init(void)
 {
@@ -76,10 +76,10 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 	}
 
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
-	si.dwFlags = STARTF_USESTDHANDLES;
-	si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-	si.hStdOutput = (p_output ? h_stdout_write : GetStdHandle(STD_OUTPUT_HANDLE));
+	si.dwFlags     = STARTF_USESTDHANDLES;
+	si.hStdInput   = GetStdHandle(STD_INPUT_HANDLE);
+	si.hStdError   = GetStdHandle(STD_ERROR_HANDLE);
+	si.hStdOutput  = p_output ? h_stdout_write : GetStdHandle(STD_OUTPUT_HANDLE);
 
 	std::wstring cmd = p_cmd;
 
@@ -145,4 +145,4 @@ void remove_files(const std::vector<std::wstring>& files)
 		CoTaskMemFree(item);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
