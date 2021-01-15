@@ -4,7 +4,7 @@ A utility for cleaning a SVN checkout by removing files that are not part of
 the repository.
 
 The current project page is located here:
-<https://github.com/bbrice/svn-clean>
+<https://github.com/blb2/svn-clean>
 
 Building
 --------
