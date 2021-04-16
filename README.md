@@ -56,5 +56,4 @@ To revert as well as remove unversioned files, one can specify the `-r` option:
 
 License
 -------
-`svn-clean` is licensed under the BSD license. See
-[LICENSE.txt](LICENSE.txt) for more info.
+`svn-clean` is licensed under version 3 of the GPL or later. See [LICENSE.txt](LICENSE.txt) for more info.
