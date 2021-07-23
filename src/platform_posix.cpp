@@ -152,14 +152,14 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 	return status;
 }
 
-int nftw_cb(const char* p_path, const struct stat* p_stat, int flags, struct FTW* p_ftw)
+static int nftw_cb(const char* p_path, const struct stat* p_stat, int flags, struct FTW* p_ftw)
 {
 	if (flags == FTW_D || flags == FTW_DP) {
 		printf("rmdir %s\n", p_path);
 		return rmdir(p_path);
 	}
 
-	if (flags == FTW_F || flags == FTW_SL) {
+	if (flags == FTW_F || flags == FTW_SL || flags == FTW_SLN) {
 		printf("unlink %s\n", p_path);
 		return unlink(p_path);
 	}
@@ -169,9 +169,23 @@ int nftw_cb(const char* p_path, const struct stat* p_stat, int flags, struct FTW
 
 void remove_files(const std::vector<std::string>& files)
 {
-	for (auto& file : files)
-		if (nftw(file.c_str(), nftw_cb, 64, FTW_DEPTH | FTW_PHYS) < 0 && errno == ENOTDIR)
-			nftw_cb(file.c_str(), nullptr, FTW_F, nullptr);
+	for (auto& file : files) {
+		if (nftw(file.c_str(), nftw_cb, 64, FTW_DEPTH | FTW_PHYS) < 0) {
+			if (errno == ENOTDIR) {
+				nftw_cb(file.c_str(), nullptr, FTW_F, nullptr);
+				continue;
+			}
+
+			struct stat stat;
+			if (lstat(file.c_str(), &stat) < 0) {
+				perror(file.c_str());
+				continue;
+			}
+
+			if (S_ISLNK(stat.st_mode))
+				nftw_cb(file.c_str(), nullptr, FTW_SL, nullptr);
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
