@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021, Brian Brice. All rights reserved.
+ * Copyright (C) 2017-2022, Brian Brice. All rights reserved.
  *
  * This file is part of svn-clean.
  *
@@ -20,15 +20,12 @@
 #ifndef SVNCLEAN_PLATFORM_H
 #define SVNCLEAN_PLATFORM_H
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #include <cstdint>
 #include <string>
 #include <vector>
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #ifdef _WIN32
+
 #include <memory>
 #include <windows.h>
 
@@ -83,8 +80,6 @@ static inline string_type convert_string(bool is_utf8, std::string&& str)
 
 #endif
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 extern const char_type g_directory_sep;
 extern const char_type g_directory_sep_other;
 
@@ -94,7 +89,5 @@ void platform_deinit(void);
 string_type get_full_path(const string_type& path);
 bool run_cmd(const char_type* p_dir, const char_type* p_cmd, std::vector<uint8_t>* p_output = nullptr);
 void remove_files(const std::vector<string_type>& files);
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif

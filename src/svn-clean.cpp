@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021, Brian Brice. All rights reserved.
+ * Copyright (C) 2017-2022, Brian Brice. All rights reserved.
  *
  * This file is part of svn-clean.
  *
@@ -25,8 +25,6 @@
 #include "../external/pugixml/src/pugixml.hpp"
 #include "platform.h"
 #include "version.h"
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct xml_writer : public pugi::xml_writer {
 	const std::string& str(void) const
@@ -159,5 +157,3 @@ int main(int argc, char* argv[])
 	platform_deinit();
 	return 0;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////

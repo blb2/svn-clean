@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021, Brian Brice. All rights reserved.
+ * Copyright (C) 2017-2022, Brian Brice. All rights reserved.
  *
  * This file is part of svn-clean.
  *
@@ -32,12 +32,8 @@
 #include <shobjidl.h>
 #include <atlbase.h>
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 extern const wchar_t g_directory_sep = L'\\';
 extern const wchar_t g_directory_sep_other = L'/';
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool platform_init(void)
 {
@@ -163,5 +159,3 @@ void remove_files(const std::vector<std::wstring>& files)
 	for (auto& item : items)
 		CoTaskMemFree(item);
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////

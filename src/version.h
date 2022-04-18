@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021, Brian Brice. All rights reserved.
+ * Copyright (C) 2017-2022, Brian Brice. All rights reserved.
  *
  * This file is part of svn-clean.
  *
@@ -20,12 +20,8 @@
 #ifndef SVNCLEAN_VERSION_H
 #define SVNCLEAN_VERSION_H
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #define SVNCLEAN_MAJOR_VER 0
 #define SVNCLEAN_MINOR_VER 1
 #define SVNCLEAN_PATCH_VER 0
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif
