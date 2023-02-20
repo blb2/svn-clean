@@ -17,7 +17,6 @@
  * along with svn-clean.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "targetver.h"
 #include <cassert>
 #include <cstdint>
 #include <algorithm>
