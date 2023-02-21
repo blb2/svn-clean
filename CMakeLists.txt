@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
+
+project(svn-clean VERSION 0.1.0 LANGUAGES CXX)
+
 message(STATUS "CMake Version: ${CMAKE_VERSION}")
+message(STATUS "CMake System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "CMake Generator: ${CMAKE_GENERATOR}")
 message(STATUS "CMake Source Dir: ${CMAKE_SOURCE_DIR}")
 message(STATUS "CMake Binary Dir: ${CMAKE_BINARY_DIR}")
@@ -11,8 +15,6 @@ endif()
 
 # Allow usage of folders if supported.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-project(svn-clean VERSION 0.1.0 LANGUAGES CXX)
 
 # This project requires at least C++11.
 set(CMAKE_CXX_STANDARD 11)
