@@ -1,8 +1,9 @@
 # svn-clean
 
 A utility for cleaning a SVN checkout by removing files that are not part of
-the repository. For the most part, this project is developed by **blb** and
-hosted at <https://github.com/blb2/svn-clean>.
+the repository.
+
+The current project page is located here: <https://github.com/blb2/svn-clean>.
 
 
 ## Building
