@@ -66,7 +66,7 @@ The following are steps taken to produce your first build:
 This application can take directory paths as arguments. If no path is given,
 then the current directory is used.
 
-	svn-clean svn-project1 svn-project2
+    svn-clean svn-project1 svn-project2
 
 On Windows, the shell is used to delete files. Unfortunately, this means the
 list of files being deleted will not be printed out. However, the delete process
@@ -76,13 +76,13 @@ list of directories and files are printed out as they're deleted.
 If you'd like to see a test run, or dry run, of what the command would do
 without actually doing it, you can use the `-n` option:
 
-	svn-clean -n
-	/home/user/project/Makefile~
-	/home/user/project/README~
+    svn-clean -n
+    /home/user/project/Makefile~
+    /home/user/project/README~
 
 To revert as well as remove unversioned files, one can specify the `-r` option:
 
-	svn-clean -r
+    svn-clean -r
 
 
 ## License
