@@ -1,0 +1,50 @@
+/*
+ * Copyright (C) 2017-2023, Brian Brice. All rights reserved.
+ *
+ * This file is part of svn-clean.
+ *
+ * svn-clean is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * svn-clean is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with svn-clean.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#ifndef SVNCLEAN_VERSION_H
+#define SVNCLEAN_VERSION_H
+
+#define SVNCLEAN_VERSION_STRINGIZE2(s) #s
+#define SVNCLEAN_VERSION_STRINGIZE(s) SVNCLEAN_VERSION_STRINGIZE2(s)
+
+#define SVNCLEAN_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define SVNCLEAN_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define SVNCLEAN_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define SVNCLEAN_VERSION_BUILD @PROJECT_VERSION_TWEAK@
+
+#define SVNCLEAN_VERSION_SLIM_STR \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_MAJOR) "." \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_MINOR) "." \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_PATCH)
+
+#define SVNCLEAN_VERSION_FULL_STR \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_MAJOR) "." \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_MINOR) "." \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_PATCH) "." \
+	SVNCLEAN_VERSION_STRINGIZE(SVNCLEAN_VERSION_BUILD)
+
+#ifdef _WIN32
+#define SVNCLEAN_VERSION_SLIM_CSV \
+	SVNCLEAN_VERSION_MAJOR, SVNCLEAN_VERSION_MINOR, SVNCLEAN_VERSION_PATCH
+
+#define SVNCLEAN_VERSION_FULL_CSV \
+	SVNCLEAN_VERSION_MAJOR, SVNCLEAN_VERSION_MINOR, SVNCLEAN_VERSION_PATCH, SVNCLEAN_VERSION_BUILD
+#endif
+
+#endif

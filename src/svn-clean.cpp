@@ -81,6 +81,8 @@ std::vector<string_type> find_externals(const pugi::xml_document& xdoc)
 
 int main(int argc, char* argv[])
 {
+	puts("svn-clean v" SVNCLEAN_VERSION_SLIM_STR "\n");
+
 	bool debug   = false;
 	bool dry_run = false;
 	bool revert  = false;

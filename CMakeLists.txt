@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(svn-clean VERSION 0.1.0 LANGUAGES CXX)
+project(svn-clean VERSION 0.1.0.0 LANGUAGES CXX)
 
 message(STATUS "CMake Version: ${CMAKE_VERSION}")
 message(STATUS "CMake System: ${CMAKE_SYSTEM_NAME}")
@@ -104,16 +104,20 @@ set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${PROJ_SHARED_LINKER_FLAGS_RELEASE}" CACH
 set(CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "${PROJ_SHARED_LINKER_FLAGS_MINSIZEREL}" CACHE STRING "" FORCE)
 set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${PROJ_SHARED_LINKER_FLAGS_RELWITHDEBINFO}" CACHE STRING "" FORCE)
 
+configure_file(src/version.h.in src/version.h @ONLY)
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/src")
+
 set(
 	HEADERS
 	src/platform.h
-	src/version.h
+	${CMAKE_CURRENT_BINARY_DIR}/src/version.h
 )
 
 set(SOURCES src/svn-clean.cpp)
 
 if(WIN32)
 	list(APPEND SOURCES src/platform_win32.cpp)
+	list(APPEND SOURCES src/svn-clean.rc)
 else()
 	list(APPEND SOURCES src/platform_posix.cpp)
 endif()
