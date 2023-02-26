@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by olio.rc
+// Used by svn-clean.rc
 //
 
 // Next default values for new objects
