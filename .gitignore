@@ -10,7 +10,9 @@
 .vs/
 
 bin/
+build/
 ipch/
 obj/
+out/
 
 Generated\ Files/
