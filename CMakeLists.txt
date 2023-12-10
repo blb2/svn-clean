@@ -1,5 +1,21 @@
 cmake_minimum_required(VERSION 3.16)
 
+# For Windows and using CMake >= 3.27, ensure that the version of the Windows
+# SDK that's selected is 10.0 and not a specific version. This is only done if
+# version= is not given on command-line. This has to be done before project().
+if(WIN32 AND "${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.27")
+	if(NOT "${CMAKE_GENERATOR_PLATFORM}" MATCHES "version=")
+		if(CMAKE_GENERATOR_PLATFORM)
+			string(APPEND CMAKE_GENERATOR_PLATFORM ",")
+		endif()
+		string(APPEND CMAKE_GENERATOR_PLATFORM "version=10.0")
+	endif()
+endif()
+# If CMAKE_SYSTEM_VERSION is not given, default to Windows 10.
+if(WIN32 AND NOT CMAKE_SYSTEM_VERSION)
+	set(CMAKE_SYSTEM_VERSION 10.0 CACHE INTERNAL "")
+endif()
+
 project(svn-clean VERSION 0.1.0.0 LANGUAGES CXX)
 
 message(STATUS "CMake Version: ${CMAKE_VERSION}")

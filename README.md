@@ -17,8 +17,17 @@ choose the way that you prefer to work best.
 If `cmake` is not in your system's `PATH`, then feel free to add it temporarily
 with one of the following commands:
 
-    PATH=%PROGRAMFILES%\CMake\bin;%PATH%
-    PATH=$(cygpath -u "$PROGRAMFILES")/CMake/bin:$PATH
+*   Command Prompt:
+
+        PATH=%PROGRAMFILES%\CMake\bin;%PATH%
+
+*   PowerShell:
+
+        $Env:PATH += ";$Env:PROGRAMFILES\CMake\bin"
+
+*   Git Bash:
+
+        PATH=$(cygpath -u "$PROGRAMFILES")/CMake/bin:$PATH
 
 The following are steps taken to produce your first build:
 
@@ -38,6 +47,12 @@ The following are steps taken to produce your first build:
     Windows platform, but wish to build for 32-bit:
 
         cmake -B build -A Win32
+
+    If using CMake 3.27 or greater, and building on Windows with Visual Studio,
+    it is preferable to specify the version of the Windows SDK with the
+    following argument:
+
+        cmake -B build -A version=10.0
 
 2.  The following are examples of performing the actual build step:
 
