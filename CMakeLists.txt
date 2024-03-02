@@ -39,6 +39,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 elseif(CMAKE_BUILD_TYPE)
 	message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
+elseif(CMAKE_CONFIGURATION_TYPES)
+	message(STATUS "CMake Build Types: ${CMAKE_CONFIGURATION_TYPES}")
 endif()
 
 # Allow usage of folders if supported.
