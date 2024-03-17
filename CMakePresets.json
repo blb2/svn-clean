@@ -27,6 +27,11 @@
       "architecture": {
         "value": "Win32",
         "strategy": "set"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "windows-msvc-x86"
+        }
       }
     },
     {
@@ -35,6 +40,11 @@
       "architecture": {
         "value": "x64",
         "strategy": "set"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intelliSenseMode": "windows-msvc-x64"
+        }
       }
     }
   ],
