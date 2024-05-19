@@ -31,7 +31,7 @@
 #include <shobjidl.h>
 #include <atlbase.h>
 
-extern const wchar_t g_directory_sep = L'\\';
+extern const wchar_t g_directory_sep       = L'\\';
 extern const wchar_t g_directory_sep_other = L'/';
 
 bool platform_init(void)
@@ -79,7 +79,7 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 
 	HANDLE h_stdout_read = INVALID_HANDLE_VALUE, h_stdout_write = INVALID_HANDLE_VALUE;
 	if (p_output) {
-		SECURITY_ATTRIBUTES stdout_sec_attrs = { };
+		SECURITY_ATTRIBUTES stdout_sec_attrs = {};
 		stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
 		stdout_sec_attrs.bInheritHandle = TRUE;
 
@@ -89,7 +89,7 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 		SetHandleInformation(h_stdout_read, HANDLE_FLAG_INHERIT, 0);
 	}
 
-	STARTUPINFO si = { sizeof(STARTUPINFO) };
+	STARTUPINFO si = {sizeof(STARTUPINFO)};
 	si.dwFlags     = STARTF_USESTDHANDLES;
 	si.hStdInput   = GetStdHandle(STD_INPUT_HANDLE);
 	si.hStdError   = GetStdHandle(STD_ERROR_HANDLE);
@@ -97,7 +97,7 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 
 	std::wstring cmd = p_cmd;
 
-	PROCESS_INFORMATION pi = { };
+	PROCESS_INFORMATION pi = {};
 	if (CreateProcess(nullptr, const_cast<wchar_t*>(cmd.c_str()), nullptr, nullptr, TRUE, 0, nullptr, p_dir, &si, &pi)) {
 		if (h_stdout_write != INVALID_HANDLE_VALUE) {
 			CloseHandle(h_stdout_write);

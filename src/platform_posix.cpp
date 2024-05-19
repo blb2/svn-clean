@@ -72,7 +72,7 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 		return status;
 
 	std::string cmd = p_cmd;
-	std::vector<char*> argv = { const_cast<char*>(cmd.c_str()) };
+	std::vector<char*> argv = {const_cast<char*>(cmd.c_str())};
 
 	size_t pos = cmd.find(' ');
 	while (pos != std::string::npos) {
