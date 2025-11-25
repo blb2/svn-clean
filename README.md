@@ -42,11 +42,11 @@ with one of the following commands:
 The following configuration presets are available, along with build presets
 under them:
 
-*   `windows-msvc-x86`: Sets up CMake to use the "Visual Studio 17 2022"
+*   `windows-msvc-x86`: Sets up CMake to use the "Visual Studio 18 2026"
     generator for producing a 32-bit build.
     *   `windows-msvc-x86-dbg`: Builds the `Debug` configuration.
     *   `windows-msvc-x86-rel`: Builds the `Release` configuration.
-*   `windows-msvc-x64`: Sets up CMake to use the "Visual Studio 17 2022"
+*   `windows-msvc-x64`: Sets up CMake to use the "Visual Studio 18 2026"
     generator for producing a 64-bit build.
     *   `windows-msvc-x64-dbg`: Builds the `Debug` configuration.
     *   `windows-msvc-x64-rel`: Builds the `Release` configuration.
