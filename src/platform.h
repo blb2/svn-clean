@@ -20,6 +20,7 @@
 #ifndef SVNCLEAN_PLATFORM_H
 #define SVNCLEAN_PLATFORM_H
 
+#include <cassert>
 #include <cstdint>
 #include <string>
 #include <vector>

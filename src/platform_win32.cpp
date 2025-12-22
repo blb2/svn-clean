@@ -67,8 +67,9 @@ std::wstring get_full_path(const std::wstring& path)
 
 	std::replace(full_path.begin(), full_path.end(), L'/', L'\\');
 
-	while (!full_path.empty() && full_path.back() == L'\\')
+	while (!full_path.empty() && full_path.back() == L'\\') {
 		full_path.pop_back();
+	}
 
 	return full_path;
 }
@@ -83,8 +84,9 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 		stdout_sec_attrs.nLength = sizeof(SECURITY_ATTRIBUTES);
 		stdout_sec_attrs.bInheritHandle = TRUE;
 
-		if (!CreatePipe(&h_stdout_read, &h_stdout_write, &stdout_sec_attrs, 0))
+		if (!CreatePipe(&h_stdout_read, &h_stdout_write, &stdout_sec_attrs, 0)) {
 			return status;
+		}
 
 		SetHandleInformation(h_stdout_read, HANDLE_FLAG_INHERIT, 0);
 	}
@@ -108,8 +110,9 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 			std::array<uint8_t, BUFSIZ> read_block;
 
 			DWORD nbytes;
-			while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &nbytes, nullptr) && nbytes != 0)
+			while (ReadFile(h_stdout_read, read_block.data(), static_cast<DWORD>(read_block.size()), &nbytes, nullptr) && nbytes != 0) {
 				p_output->insert(p_output->end(), read_block.begin(), read_block.begin() + nbytes);
+			}
 		}
 
 		WaitForSingleObject(pi.hProcess, INFINITE);
@@ -124,11 +127,13 @@ bool run_cmd(const wchar_t* p_dir, const wchar_t* p_cmd, std::vector<uint8_t>* p
 		assert(status);
 	}
 
-	if (h_stdout_write != INVALID_HANDLE_VALUE)
+	if (h_stdout_write != INVALID_HANDLE_VALUE) {
 		CloseHandle(h_stdout_write);
+	}
 
-	if (h_stdout_read != INVALID_HANDLE_VALUE)
+	if (h_stdout_read != INVALID_HANDLE_VALUE) {
 		CloseHandle(h_stdout_read);
+	}
 
 	return status;
 }
@@ -140,21 +145,26 @@ void remove_files(const std::vector<std::wstring>& files)
 
 	for (auto& file : files) {
 		PIDLIST_ABSOLUTE item;
-		if (SUCCEEDED(SHParseDisplayName(file.c_str(), nullptr, &item, 0, nullptr)))
+		if (SUCCEEDED(SHParseDisplayName(file.c_str(), nullptr, &item, 0, nullptr))) {
 			items.push_back(item);
+		}
 	}
 
-	if (items.empty())
+	if (items.empty()) {
 		return;
+	}
 
 	CComPtr<IShellItemArray> p_items;
 	if (SUCCEEDED(SHCreateShellItemArrayFromIDLists((UINT)items.size(), items.data(), &p_items))) {
 		CComPtr<IFileOperation> p_file_op;
-		if (SUCCEEDED(p_file_op.CoCreateInstance(CLSID_FileOperation)))
-			if (SUCCEEDED(p_file_op->DeleteItems(p_items)))
+		if (SUCCEEDED(p_file_op.CoCreateInstance(CLSID_FileOperation))) {
+			if (SUCCEEDED(p_file_op->DeleteItems(p_items))) {
 				p_file_op->PerformOperations();
+			}
+		}
 	}
 
-	for (auto& item : items)
+	for (auto& item : items) {
 		CoTaskMemFree(item);
+	}
 }

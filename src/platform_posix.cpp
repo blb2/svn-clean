@@ -57,8 +57,9 @@ std::string get_full_path(const std::string& path)
 
 	std::replace(full_path.begin(), full_path.end(), '\\', '/');
 
-	while (!full_path.empty() && full_path.back() == '/')
+	while (!full_path.empty() && full_path.back() == '/') {
 		full_path.pop_back();
+	}
 
 	return full_path;
 }
@@ -68,8 +69,9 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 	bool status = false;
 
 	int fd[2];
-	if (p_output && pipe(fd) < 0)
+	if (p_output && pipe(fd) < 0) {
 		return status;
+	}
 
 	std::string cmd = p_cmd;
 	std::vector<char*> argv = {const_cast<char*>(cmd.c_str())};
@@ -78,11 +80,13 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 	while (pos != std::string::npos) {
 		cmd[pos++] = '\0';
 
-		while (pos != cmd.length() && cmd[pos] == ' ')
+		while (pos != cmd.length() && cmd[pos] == ' ') {
 			cmd[pos++] = '\0';
+		}
 
-		if (pos == cmd.length())
+		if (pos == cmd.length()) {
 			break;
+		}
 
 		if (cmd[pos] == '"') {
 			argv.push_back(const_cast<char*>(cmd.c_str() + ++pos));
@@ -98,15 +102,17 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 	pid_t cmd_pid = fork();
 	if (cmd_pid == 0) {
 		if (p_output) {
-			if (dup2(fd[1], STDOUT_FILENO) != STDOUT_FILENO)
+			if (dup2(fd[1], STDOUT_FILENO) != STDOUT_FILENO) {
 				exit(EXIT_FAILURE);
+			}
 
 			close(fd[0]);
 			close(fd[1]);
 		}
 
-		if (chdir(p_dir) == 0)
+		if (chdir(p_dir) == 0) {
 			execvp(cmd.c_str(), argv.data());
+		}
 
 		exit(EXIT_FAILURE);
 	} else if (cmd_pid < 0) {
@@ -123,8 +129,9 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 				ssize_t nbytes = read(fd[0], read_block.data(), read_block.size());
 
 				if (nbytes < 0) {
-					if (errno == EINTR)
+					if (errno == EINTR) {
 						continue;
+					}
 
 					break;
 				} else if (nbytes == 0) {
@@ -138,8 +145,9 @@ bool run_cmd(const char* p_dir, const char* p_cmd, std::vector<uint8_t>* p_outpu
 		int exit_code;
 		waitpid(cmd_pid, &exit_code, 0);
 
-		if (p_output)
+		if (p_output) {
 			close(fd[0]);
+		}
 
 		status = (exit_code == 0);
 		assert(status);
@@ -178,8 +186,9 @@ void remove_files(const std::vector<std::string>& files)
 				continue;
 			}
 
-			if (S_ISLNK(stat.st_mode))
+			if (S_ISLNK(stat.st_mode)) {
 				nftw_cb(file.c_str(), nullptr, FTW_SL, nullptr);
+			}
 		}
 	}
 }
