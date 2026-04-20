@@ -6,6 +6,11 @@ if(WIN32)
 
 	# Set some variables/values that were introduced with CMake >= 3.27.
 	if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.27)
+	# Set our minimum version of Windows 10. This coincides with Windows 10,
+		# version 1903, which is the minimum version for the ICU library
+		# on Windows.
+		set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION 10.0.18362 CACHE INTERNAL "")
+
 		# Ensure that the version of the Windows SDK that's selected is 10.0 and
 		# not a specific version. This is only done if version= is not given on
 		# command-line. This has to be done before project().
@@ -23,6 +28,7 @@ project(svn-clean VERSION 0.1.0.0 LANGUAGES CXX)
 message(STATUS "CMake Version: ${CMAKE_VERSION}")
 message(STATUS "CMake System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "CMake Generator: ${CMAKE_GENERATOR}")
+message(STATUS "CMake Generator Platform: ${CMAKE_GENERATOR_PLATFORM}")
 message(STATUS "CMake Source Dir: ${CMAKE_SOURCE_DIR}")
 message(STATUS "CMake Binary Dir: ${CMAKE_BINARY_DIR}")
 
@@ -41,6 +47,26 @@ elseif(CMAKE_BUILD_TYPE)
 	message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 elseif(CMAKE_CONFIGURATION_TYPES)
 	message(STATUS "CMake Build Types: ${CMAKE_CONFIGURATION_TYPES}")
+endif()
+
+if(WIN32)
+	# Set the output directories for all build types. This is done to ensure
+	# that the output files are organized in a consistent manner. The output
+	# directories are set to be under the build directory, with separate
+	# subdirectories for each build type. The output directories are set for
+	# static libraries, shared libraries, and executables.
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_BINARY_DIR}/out/lib/debug")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE        "${CMAKE_BINARY_DIR}/out/lib/release")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_BINARY_DIR}/out/lib/minsizerel")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/out/lib/relwithdebinfo")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_BINARY_DIR}/out/lib/debug")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE        "${CMAKE_BINARY_DIR}/out/lib/release")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_BINARY_DIR}/out/lib/minsizerel")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/out/lib/relwithdebinfo")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${CMAKE_BINARY_DIR}/out/bin/debug")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${CMAKE_BINARY_DIR}/out/bin/release")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL     "${CMAKE_BINARY_DIR}/out/bin/minsizerel")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/out/bin/relwithdebinfo")
 endif()
 
 # Allow usage of folders if supported.
